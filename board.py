@@ -3,11 +3,8 @@ import time
 
 from store import Store
 
-<<<<<<< Updated upstream
-=======
 speed_of_play = 10
 
->>>>>>> Stashed changes
 class Board():
     master = None
     board = None
