@@ -12,4 +12,11 @@ class Store():
 
     def add_marbles(self, n=1):
         self.n_marbles += n
-        self.store_label['text'] = self.n_marbles
+        self.update_store_label()
+
+    def update_store_label(self):
+            self.store_label['text'] = self.n_marbles
+    
+    def reset(self):
+        self.n_marbles = 0
+        self.update_store_label()
