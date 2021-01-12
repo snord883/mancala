@@ -42,7 +42,6 @@ class Board():
         self.master.after(1500, self.move_marbles,side_i,hole_i,n_marbles)
 
     def reached_store(self,side_i,n_marbles):
-        hole_i = -1
         if side_i == self.player_up:
             print('score one for PLAYER {}: {} marbles remain in hand'.format(side_i,n_marbles-1))
             self.scoreboard[self.player_up].add_marbles()
@@ -183,4 +182,6 @@ class Board():
                 self.n_marbles = 0
                 self.update_hole_label()
                 self.outer_board.move_marbles(self.player_i,self.hole_i,temp)
+
+flip = lambda x: int(not x)
             
