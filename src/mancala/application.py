@@ -1,6 +1,7 @@
 import tkinter as tk
 from board import Board
 
+
 class Application(tk.Frame):
 
     def __init__(self, master=None):
@@ -8,6 +9,7 @@ class Application(tk.Frame):
         self.master = master
         self.pack()
         board = Board(master=master)
+
 
 root = tk.Tk()
 app = Application(master=root)
