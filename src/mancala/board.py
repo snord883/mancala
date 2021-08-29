@@ -1,6 +1,6 @@
 import tkinter as tk
 from store import Store
-from hole import Hole, flip
+from hole import Hole
 
 speed_of_play = 10
 
@@ -60,15 +60,15 @@ class Board:
     def handle_last_marble_for_hole(self):
         if self.game_board[self.side_i][self.hole_i].is_empty():
             if self.side_i == self.player_up:
-                opposite_hole_i = self.game_board[self.side_i][self.hole_i].get_opposite_hole()
-                self.scoreboard[self.player_up].add_marbles(opposite_hole_i.get_marbles())
+                opposite_hole_i = self.get_opposite_hole()
+                self.scoreboard[self.player_up].add_marbles(opposite_hole_i.grab_marbles())
                 self.scoreboard[self.player_up].add_marbles()
             else:
                 self.game_board[self.side_i][self.hole_i].add_marbles()
             self.marbles_in_hand = 0
             self.turn_over()
         else:
-            self.marbles_in_hand += self.game_board[self.side_i][self.hole_i].get_marbles()
+            self.marbles_in_hand += self.game_board[self.side_i][self.hole_i].grab_marbles()
             self.hole_i += 1
 
     def drop_marble_and_continue(self):
@@ -111,7 +111,7 @@ class Board:
 
     def is_game_over(self):
         if self.sum_marbles_from_side(0) == 0 or self.sum_marbles_from_side(1) == 0:
-            _ = [[self.scoreboard[i].add_marbles(self.game_board[i][j].get_marbles()) for i in range(2)] for j in
+            _ = [[self.scoreboard[i].add_marbles(self.game_board[i][j].grab_marbles()) for i in range(2)] for j in
                  range(6)]
             self.pick_winner()
             return True
@@ -139,3 +139,21 @@ class Board:
                             text="REMATCH!",
                             command=self.reset_board)
         rematch.pack(side=tk.LEFT)
+
+    def hole_clicked(self, player_i, hole_i):
+        if self.player_up != player_i:
+            print(f'Wrong side of the board for Player {str(self.player_up)}')
+        elif self.game_board[player_i][hole_i].n_marbles == 0:
+            print(f'Please select a hole on Player {str(self.player_up)}\'s side with marbles in it.')
+        else:
+            self.side_i = player_i
+            self.hole_i = hole_i + 1
+            self.marbles_in_hand = self.game_board[player_i][hole_i].grab_marbles()
+            self.currently_moving = True
+            self.move_marbles()
+
+    def get_opposite_hole(self):
+        return self.game_board[flip(self.player_up)][5 - self.hole_i]
+
+
+flip = lambda x: int(not x)
