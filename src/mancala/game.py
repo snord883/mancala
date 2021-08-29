@@ -43,10 +43,7 @@ class Game:
         if self.currently_moving:
             self.master.after(speed_of_play, self.move_marbles)
         else:
-            # _ = [[hole_i.update_hole_color(enabled=self.player_up==hole_i.side_i) for hole_i in holes] for holes in self.holes]
-            for holes in self.holes:
-                for hole_i in holes:
-                    hole_i.update_hole_color(enabled=self.player_up==hole_i.side_i)
+            _ = [[hole_i.update_hole_color(enabled=self.player_up==hole_i.side_i) for hole_i in holes] for holes in self.holes]
 
     def handle_last_marble(self):
         if self.is_this_a_store():
