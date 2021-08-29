@@ -1,12 +1,15 @@
 import tkinter as tk
-from board import Board
+from game import Game
+from agent import HumanAgent, RandomAgent
 
 
 class Application(tk.Frame):
 
     def play(self, master=None):
         self.pack()
-        board = Board(master=master)
+        player0 = HumanAgent(0)
+        player1 = HumanAgent(1)
+        board = Game(players=[player0,player1], master=master)
 
     # def simulate(self):
 
