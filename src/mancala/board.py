@@ -7,7 +7,7 @@ speed_of_play = 10
 
 class Board:
     master = None
-    board = None
+    frame = None
     player_up = 0
     side_i = None
     hole_i = None
@@ -18,10 +18,10 @@ class Board:
 
     def __init__(self, master):
         self.master = master
-        self.board = tk.Frame(master, bg='#3d2606')
-        self.board.place(relheight=0.8, relwidth=0.8, relx=0.1, rely=0.1)
-        self.scoreboard = [Store(self.board, store_i=i) for i in range(2)]
-        self.game_board = [[Hole(board=self.board, side_i=j, hole_i=i, outer_board=self) for i in range(6)] for j
+        self.frame = tk.Frame(master, bg='#3d2606')
+        self.frame.place(relheight=0.8, relwidth=0.8, relx=0.1, rely=0.1)
+        self.scoreboard = [Store(self.frame, store_i=i) for i in range(2)]
+        self.game_board = [[Hole(frame=self.frame, side_i=j, hole_i=i, outer_board=self) for i in range(6)] for j
                            in range(2)]
         self.rematch_prompt()
 
@@ -140,15 +140,22 @@ class Board:
                             command=self.reset_board)
         rematch.pack(side=tk.LEFT)
 
-    def hole_clicked(self, player_i, hole_i):
-        if self.player_up != player_i:
+    # def bind_hole_with_clicking(self, side_i):
+    #     # _ = [hole_i.hole_label.bind('<Button-1>', self.hole_selected(side_i, hole_i.hole_i)) for hole_i in self.game_board[side_i]]
+    #     for hole_i in self.game_board[side_i]:
+    #         hole_i.hole_label.bind(f'<Button-1>', lambda event: self.hole_selected(side_i, hole_i.hole_i))
+    #     test = True
+
+    def hole_selected(self, side_i, hole_i):
+        print(f'Side: {side_i} & Hole: {hole_i} SELECTED')
+        if self.player_up != side_i:
             print(f'Wrong side of the board for Player {str(self.player_up)}')
-        elif self.game_board[player_i][hole_i].n_marbles == 0:
+        elif self.game_board[side_i][hole_i].n_marbles == 0:
             print(f'Please select a hole on Player {str(self.player_up)}\'s side with marbles in it.')
         else:
-            self.side_i = player_i
+            self.side_i = side_i
             self.hole_i = hole_i + 1
-            self.marbles_in_hand = self.game_board[player_i][hole_i].grab_marbles()
+            self.marbles_in_hand = self.game_board[side_i][hole_i].grab_marbles()
             self.currently_moving = True
             self.move_marbles()
 

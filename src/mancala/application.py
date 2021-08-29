@@ -4,15 +4,16 @@ from board import Board
 
 class Application(tk.Frame):
 
-    def __init__(self, master=None):
-        super().__init__(master)
-        self.master = master
+    def play(self, master=None):
         self.pack()
         board = Board(master=master)
 
+    # def simulate(self):
+
 
 root = tk.Tk()
-app = Application(master=root)
+app = Application()
+app.play(master=root)
 root.title("MANCALA!!!")
 root.geometry('600x300')
 app.mainloop()
