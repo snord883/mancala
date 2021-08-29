@@ -1,11 +1,11 @@
 
 
 class MancalaAgent:
-    possible_next_states = []
-    probability_distribution = {}
+    possible_states = []
 
     def __init__(self, player_side):
         self.player_side = player_side
+
 
 
 class RandomAgent(MancalaAgent):
