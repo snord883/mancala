@@ -1,7 +1,7 @@
 import tkinter as tk
 from store import Store
 from hole import Hole
-from agent import HumanAgent
+from agent import HumanAgent, RandomAgent
 
 speed_of_play = 10
 
@@ -10,6 +10,7 @@ class Game:
     master = None
     frame = None
     player_up = 0
+    players = []
     side_i = None
     hole_i = None
     currently_moving = False
@@ -21,18 +22,14 @@ class Game:
         self.master = master
         self.frame = tk.Frame(master, bg='#3d2606')
         self.frame.place(relheight=0.8, relwidth=0.8, relx=0.1, rely=0.1)
+        self.players = players
         self.scoreboard = [Store(self.frame, store_i=i) for i in range(2)]
-        self.holes = [[Hole(frame=self.frame, side_i=j, hole_i=i, enabled=self.player_up==j) for i in range(6)] for j
-                      in range(2)]
+        self.holes = [[Hole(frame=self.frame, side_i=player.player_side, hole_i=i, enabled=self.player_up==player.player_side) for i in range(6)] for player
+                      in players]
         for player in players:
             if isinstance(player, HumanAgent):
                 self.bind_holes_with_clicking(player.player_side)
         self.rematch_prompt()
-
-    def reset_board(self):
-        self.player_up = 0
-        _ = [self.scoreboard[i].reset() for i in range(2)]
-        _ = [[self.holes[j][i].reset() for i in range(6)] for j in range(2)]
 
     def move_marbles(self):
         if self.marbles_in_hand == 1:
@@ -44,6 +41,7 @@ class Game:
             self.master.after(speed_of_play, self.move_marbles)
         else:
             _ = [[hole_i.update_hole_color(enabled=self.player_up==hole_i.side_i) for hole_i in holes] for holes in self.holes]
+            self.is_game_over()
 
     def handle_last_marble(self):
         if self.is_this_a_store():
@@ -57,7 +55,6 @@ class Game:
             self.marbles_in_hand = 0
             self.currently_moving = False
             print('EXTRA TURN :)')
-            self.is_game_over()
         else:
             self.switch_sides()
 
@@ -79,7 +76,8 @@ class Game:
         if self.is_this_a_store():
             if self.side_i == self.player_up:
                 print(
-                    f'score one for PLAYER {self.player_up}: now has {self.scoreboard[self.player_up]} points and {self.marbles_in_hand - 1} marbles remain in hand')
+                    f'score 1 for PLAYER {self.player_up}: now has {self.scoreboard[self.player_up].n_marbles + 1} points '
+                    f'and {self.marbles_in_hand - 1} marbles remain in hand')
                 self.score_and_switch()
             else:
                 print(f'Skip this store: {self.marbles_in_hand} marbles remain in hand')
@@ -111,15 +109,18 @@ class Game:
         self.player_up = flip(self.player_up)
         self.currently_moving = False
         print("Turn over :(")
-        self.is_game_over()
+
+    def prompt_computer_player(self, computer_player):
+        self.hole_selected(*computer_player.select_from_possible_holes(
+            [hole for hole in self.holes[computer_player.player_side] if hole.n_marbles > 0]))
 
     def is_game_over(self):
         if self.sum_marbles_from_side(0) == 0 or self.sum_marbles_from_side(1) == 0:
             _ = [[self.scoreboard[i].add_marbles(self.holes[i][j].grab_marbles()) for i in range(2)] for j in
                  range(6)]
             self.pick_winner()
-            return True
-        return False
+        elif isinstance(self.players[self.player_up], RandomAgent):
+            self.prompt_computer_player(self.players[self.player_up])
 
     def sum_marbles_from_side(self, n):
         print(f'{sum([self.holes[n][i].n_marbles for i in range(6)])} marbles remain on side {n}')
@@ -143,6 +144,11 @@ class Game:
                             text="REMATCH!",
                             command=self.reset_board)
         rematch.pack(side=tk.LEFT)
+
+    def reset_board(self):
+        self.player_up = 0
+        _ = [self.scoreboard[i].reset() for i in range(2)]
+        _ = [[self.holes[j][i].reset() for i in range(6)] for j in range(2)]
 
     def bind_holes_with_clicking(self, side_i):
         for hole_i in self.holes[side_i]:
