@@ -4,14 +4,14 @@ import time
 
 class RandomAgent:
 
+    actions = []
+    states = []
+
     def __init__(self, player_side):
         self.player_side = player_side
 
-    def get_state_of_game(self, state):
-        hole_i = random.choice(possible_holes).hole_i
-        print(f'RandomAgent selects: {hole_i}')
-        time.sleep(10)
-        return self.player_side, hole_i
+    def get_state_of_game(self, holes, scoreboard):
+        tmp_state = []
 
 
 class HumanAgent:
