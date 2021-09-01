@@ -3,7 +3,7 @@ from store import Store
 from hole import Hole
 from agent import HumanAgent, RandomAgent
 
-speed_of_play = 250
+speed_of_play = 10
 
 
 class Game:
@@ -17,6 +17,7 @@ class Game:
     scoreboard = None
     holes = None
     currently_moving = False
+    game_over = False
 
     def __init__(self, players, master=None):
         self.player_up = players[0]
@@ -25,7 +26,7 @@ class Game:
         self.holes = [[Hole(side_i=player.player_side, hole_i=i, enabled=player==players[0]) for i in range(6)] for player in players]
         if master is not None:
             self.display(master)
-            temp = None
+        self.play_game()
 
     def display(self, master):
         self.master = master
@@ -38,21 +39,47 @@ class Game:
                 self.bind_holes_with_clicking(player.player_side)
         self.rematch_prompt()
 
-    # def play(self):
-    #     print("playing")
-    #     self.players[self.player_up.player_side].get_state_of_game(holes=self.holes, scoreboard=self.scoreboard)
+    def play_game(self):
+        self.play_turn()
 
-    def move_marbles(self):
+    def play_turn(self):
+        print(f"Playing turn for PLAYER {self.player_up.player_side}")
+        self.players[self.player_up.player_side].get_state_of_game(holes=self.holes, scoreboard=self.scoreboard)
+        if isinstance(self.player_up, RandomAgent):
+            self.prompt_computer_player()
+
+    def bind_holes_with_clicking(self, side_i):
+        for hole_i in self.holes[side_i]:
+            hole_i.hole_label.bind(f'<Button-1>', lambda event, side_i=side_i, hole_i=hole_i.hole_i: self.hole_selected(side_i, hole_i))
+
+    def hole_selected(self, side_i, hole_i):
+        print(f'Side: {side_i} & Hole: {hole_i} SELECTED')
+        if self.player_up.player_side != side_i:
+            print("self.player_up.player_side: ", self.player_up.player_side)
+            print("side_i: ", side_i)
+            print(f'Wrong side of the board for Player {str(self.player_up.player_side)}')
+        elif self.holes[side_i][hole_i].n_marbles == 0:
+            print(f'Please select a hole on Player {str(self.player_up.player_side)}\'s side with marbles in it.')
+        else:
+            # self.player_up.actions.append(hole_i)
+            self.marbles_in_hand = self.holes[side_i][hole_i].grab_marbles()
+            self.side_i = side_i
+            self.hole_i = hole_i + 1
+            self.currently_moving = True
+            self.move_marbles_animation()
+
+    def move_marbles_animation(self):
         if self.marbles_in_hand == 1:
             self.handle_last_marble()
         else:
             self.drop_marble_and_continue()
 
         if self.currently_moving:
-            self.master.after(speed_of_play, self.move_marbles)
+            self.master.after(speed_of_play, self.move_marbles_animation)
         else:
             _ = [[hole_i.update_hole_color() for hole_i in holes] for holes in self.holes]
-            self.is_game_over()
+            if not self.is_game_over():
+                self.play_turn()
 
     def handle_last_marble(self):
         if self.is_this_a_store():
@@ -121,17 +148,17 @@ class Game:
         self.currently_moving = False
         print("Turn over :(")
 
-    def prompt_computer_player(self, computer_player):
-        self.hole_selected(*computer_player.select_from_possible_holes(
-            [hole for hole in self.holes[computer_player.player_side] if hole.n_marbles > 0]))
+    def prompt_computer_player(self):
+        self.hole_selected(*self.player_up.select_from_possible_holes(
+            [hole.hole_i for hole in self.holes[self.player_up.player_side] if hole.n_marbles > 0]))
 
     def is_game_over(self):
         if self.sum_marbles_from_side(0) == 0 or self.sum_marbles_from_side(1) == 0:
             _ = [[self.scoreboard[i].add_marbles(self.holes[i][j].grab_marbles()) for i in range(2)] for j in
                  range(6)]
             self.pick_winner()
-        elif isinstance(self.player_up, RandomAgent):
-            self.prompt_computer_player(self.player_up)
+            return True
+        return False
 
     def sum_marbles_from_side(self, n):
         print(f'{sum([self.holes[n][i].n_marbles for i in range(6)])} marbles remain on side {n}')
@@ -166,23 +193,6 @@ class Game:
             for hole_i in holes_on_one_side:
                 hole_i.enabled = hole_i.side_i==self.player_up.player_side
                 hole_i.update_hole_color()
-
-    def bind_holes_with_clicking(self, side_i):
-        for hole_i in self.holes[side_i]:
-            hole_i.hole_label.bind(f'<Button-1>', lambda event, side_i=side_i, hole_i=hole_i.hole_i: self.hole_selected(side_i, hole_i))
-
-    def hole_selected(self, side_i, hole_i):
-        print(f'Side: {side_i} & Hole: {hole_i} SELECTED')
-        if self.player_up.player_side != side_i:
-            print(f'Wrong side of the board for Player {str(self.player_up.player_side)}')
-        elif self.holes[side_i][hole_i].n_marbles == 0:
-            print(f'Please select a hole on Player {str(self.player_up.player_side)}\'s side with marbles in it.')
-        else:
-            self.marbles_in_hand = self.holes[side_i][hole_i].grab_marbles()
-            self.side_i = side_i
-            self.hole_i = hole_i + 1
-            self.currently_moving = True
-            self.move_marbles()
 
     def get_opposite_hole(self):
 
