@@ -17,15 +17,13 @@ class Game:
     scoreboard = None
     holes = None
     currently_moving = False
-    game_over = False
 
     def __init__(self, players, master=None):
         self.player_up = players[0]
         self.players = players
         self.scoreboard = [Store(store_i=player.player_side) for player in players]
         self.holes = [[Hole(side_i=player.player_side, hole_i=i, enabled=player==players[0]) for i in range(6)] for player in players]
-        if master is not None:
-            self.display(master)
+        self.display(master)
         self.play_game()
 
     def display(self, master):
@@ -44,7 +42,7 @@ class Game:
 
     def play_turn(self):
         print(f"Playing turn for PLAYER {self.player_up.player_side}")
-        self.players[self.player_up.player_side].get_state_of_game(holes=self.holes, scoreboard=self.scoreboard)
+        self.player_up.get_state_of_game(holes=self.holes, scoreboard=self.scoreboard)
         if isinstance(self.player_up, RandomAgent):
             self.prompt_computer_player()
 
@@ -61,7 +59,8 @@ class Game:
         elif self.holes[side_i][hole_i].n_marbles == 0:
             print(f'Please select a hole on Player {str(self.player_up.player_side)}\'s side with marbles in it.')
         else:
-            # self.player_up.actions.append(hole_i)
+            self.player_up.actions.append(hole_i)
+            print(f"ACTION TAKEN BY PLAYER {self.player_up.player_side}: {self.player_up.actions}")
             self.marbles_in_hand = self.holes[side_i][hole_i].grab_marbles()
             self.side_i = side_i
             self.hole_i = hole_i + 1

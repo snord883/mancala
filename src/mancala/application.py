@@ -10,7 +10,7 @@ class Application(tk.Frame):
 
     def play(self, master=None):
         self.pack()
-        player0 = RandomAgent(0)
+        player0 = HumanAgent(0)
         player1 = HumanAgent(1)
         game = Game(players=[player0, player1], master=master)
         print("NORD")
