@@ -1,28 +1,27 @@
 import tkinter as tk
-from game import Game
+from game import Simulation, AnimatedGame
 from agent import HumanAgent, RandomAgent
-
-games_played = 0
 
 
 class Application(tk.Frame):
-    # game =
+    game = None
 
     def play(self, master=None):
         self.pack()
-        player0 = HumanAgent(0)
-        player1 = HumanAgent(1)
-        game = Game(players=[player0, player1], master=master)
-        print("NORD")
+        self.game = AnimatedGame(players=[HumanAgent(0), HumanAgent(1)], master=master)
 
-    # def simulate(self):
+    def simulate(self):
+        self.game = Simulation(n_games=10)
 
-# def
+# def play_another():
+#     app.game
 
 
 root = tk.Tk()
 app = Application()
-app.play(master=root)
-root.title("MANCALA!!!")
-root.geometry('600x300')
-app.mainloop()
+# app.play(master=root)
+# root.title("MANCALA!!!")
+# root.geometry('600x300')
+# app.mainloop()
+
+app.simulate()

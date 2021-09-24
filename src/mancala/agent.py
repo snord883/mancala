@@ -1,13 +1,16 @@
+from copy import deepcopy
 import random
 import time
+import logging
+
+logger = logging.Logger("MANCALA", level=logging.DEBUG)
 
 
 class MancalaAgent:
 
     def __init__(self, player_side):
         self.player_side = player_side
-        self.actions = []
-        self.states = []
+        self.set_game()
         self.games = []
 
     def get_state_of_game(self, holes, scoreboard):
@@ -20,7 +23,26 @@ class MancalaAgent:
         self.states.append(tmp_state)
         print(f"PLAYER {self.player_side} STATES: {self.states}")
 
-    # def get_results_of_game(self, scoreboard):
+    def set_game(self):
+        self.actions = []
+        self.rewards = []
+        self.states = []
+
+    def store_game_results(self):
+        tmp_game = {
+            "actions": deepcopy(self.actions),
+            "rewards": deepcopy(self.rewards),
+            "states": deepcopy(self.states)
+        }
+
+        self.games.append(tmp_game)
+        print(self.games)
+        self.set_game()
+
+    def store_rewards(self, scoreboard):
+        reward = scoreboard - sum(self.rewards)
+        self.rewards.append(reward)
+        print(f"PLAYER {self.player_side} REWARDS: {self.rewards}")
 
 
 

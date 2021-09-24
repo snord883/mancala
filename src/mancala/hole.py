@@ -1,9 +1,13 @@
 import tkinter as tk
+import logging
 
 DISABLED_BACKGROUND_COLOR = '#101010'
 ENABLED_BACKGROUND_COLOR = '#c87e4f'
 WHITE_FONT_COLOR = "white"
 BLACK_FONT_COLOR = "black"
+
+logger = logging.Logger("MANCALA", level=logging.DEBUG)
+
 
 class Hole:
     hole_label = None

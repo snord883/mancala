@@ -18,7 +18,8 @@ class Store:
         self.update_store_label()
 
     def update_store_label(self):
-        self.store_label['text'] = self.n_marbles
+        if self.store_label is not None:
+            self.store_label['text'] = self.n_marbles
 
     def reset(self):
         self.n_marbles = 0
