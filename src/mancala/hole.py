@@ -8,12 +8,14 @@ BLACK_FONT_COLOR = "black"
 
 logger = logging.Logger("MANCALA", level=logging.DEBUG)
 
+N_MARBLES = 4
+
 
 class Hole:
     hole_label = None
     side_i = None
     hole_i = None
-    n_marbles = 4
+    n_marbles = N_MARBLES
     enabled = False
 
     def __init__(self, side_i, hole_i, enabled):
@@ -37,7 +39,7 @@ class Hole:
         return WHITE_FONT_COLOR if not self.enabled and not self.is_empty() else BLACK_FONT_COLOR
 
     def reset(self, enabled):
-        self.n_marbles = 4
+        self.n_marbles = N_MARBLES
         self.enabled = enabled
         self.update_hole_label()
         self.update_hole_color()

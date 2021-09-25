@@ -7,7 +7,8 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.Logger("GAME", level=logging.DEBUG)
 
-speed_of_play = 10
+speed_of_play = 0
+N_HOLES = 6
 
 
 class Game:
@@ -27,7 +28,7 @@ class Game:
         self.player_up = players[0]
         self.players = players
         self.scoreboard = [Store(store_i=player.player_side) for player in players]
-        self.holes = [[Hole(side_i=player.player_side, hole_i=i, enabled=player==players[0]) for i in range(6)] for player in players]
+        self.holes = [[Hole(side_i=player.player_side, hole_i=i, enabled=player==players[0]) for i in range(N_HOLES)] for player in players]
         if master is not None: self.display(master)
         self.play_game()
 
@@ -84,8 +85,12 @@ class Game:
                 self.master.after(speed_of_play, self.move_marbles)
             else:
                 _ = [[hole_i.update_hole_color() for hole_i in holes] for holes in self.holes]
-                if not self.is_game_over():
-                    self.play_turn()
+                self.is_game_over()
+        else:
+            if self.currently_moving:
+                self.move_marbles()
+            else:
+                self.is_game_over()
 
     def handle_last_marble(self):
         if self.is_this_a_store():
@@ -148,7 +153,7 @@ class Game:
         self.hole_i = 0
 
     def is_this_a_store(self):
-        return self.hole_i == 6
+        return self.hole_i == N_HOLES
 
     def turn_over(self):
         self.player_up.store_rewards(self.scoreboard[self.player_up.player_side].n_marbles)
@@ -162,21 +167,27 @@ class Game:
 
     def is_game_over(self):
         if self.sum_marbles_from_side(0) == 0 or self.sum_marbles_from_side(1) == 0:
-            _ = [[self.scoreboard[i].add_marbles(self.holes[i][j].grab_marbles()) for i in range(2)] for j in
-                 range(6)]
-            for player in self.players:
-                player.store_rewards(self.scoreboard[player.player_side].n_marbles)
-                player.store_game_results()
+            self.move_remaining_marbles_to_store()
+            self.track_player_data()
             self.pick_winner()
-            return True
-        return False
+        else:
+            self.play_turn()
+
+    def move_remaining_marbles_to_store(self):
+        _ = [[self.scoreboard[i].add_marbles(self.holes[i][j].grab_marbles()) for i in range(2)] for j in
+             range(N_HOLES)]
+        
+    def track_player_data(self):
+        for player in self.players:
+            player.store_rewards(self.scoreboard[player.player_side].n_marbles)
+            player.store_game_results()
 
     def sum_marbles_from_side(self, n):
-        print(f'{sum([self.holes[n][i].n_marbles for i in range(6)])} marbles remain on side {n}')
-        return sum([self.holes[n][i].n_marbles for i in range(6)])
+        print(f'{sum([self.holes[n][i].n_marbles for i in range(N_HOLES)])} marbles remain on side {n}')
+        return sum([self.holes[n][i].n_marbles for i in range(N_HOLES)])
 
     def pick_winner(self):
-        if self.scoreboard[0] == self.scoreboard[1]:
+        if self.scoreboard[0].n_marbles == self.scoreboard[1].n_marbles:
             print('TIE GAME...TIEBREAKER...REMATCH!')
             return None
         else:
@@ -212,7 +223,8 @@ class Game:
 
     def switch_players(self):
         self.player_up = self.players[flip(self.player_up.player_side)]
-        self.update_hole_colors_on_board()
+        if self.animation:
+            self.update_hole_colors_on_board()
 
 
 flip = lambda x: int(not x)
@@ -229,4 +241,4 @@ class Simulation(Game):
     n_games = 0
 
     def __init__(self, n_games):
-        super().__init__(players=[RandomAgent(0), RandomAgent(1)])
+        super().__init__(players=[RandomAgent(0), RandomAgent(1)], n_games=n_games)
