@@ -163,7 +163,7 @@ class Game:
 
     def prompt_computer_player(self):
         self.hole_selected(*self.player_up.select_from_possible_holes(
-            [hole.hole_i for hole in self.holes[self.player_up.player_side] if hole.n_marbles > 0]))
+            [hole.hole_i for hole in self.holes[self.player_up.player_side] if hole.n_marbles > 0]), time_delay=.5)
 
     def is_game_over(self):
         if self.sum_marbles_from_side(0) == 0 or self.sum_marbles_from_side(1) == 0:

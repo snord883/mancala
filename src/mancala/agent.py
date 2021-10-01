@@ -19,30 +19,32 @@ class MancalaAgent:
             for hole in holes[player_idx]:
                 tmp_state.append(hole.n_marbles)
             tmp_state.append(scoreboard[player_idx].n_marbles)
-        print(tmp_state)
+        # print(tmp_state)
         self.states.append(tmp_state)
-        print(f"PLAYER {self.player_side} STATES: {self.states}")
+        # print(f"PLAYER {self.player_side} STATES: {self.states}")
 
     def set_game(self):
         self.actions = []
         self.rewards = []
         self.states = []
+        self.turns = []
 
     def store_game_results(self):
         tmp_game = {
             "actions": deepcopy(self.actions),
+            "turns": deepcopy(self.turns),
             "rewards": deepcopy(self.rewards),
-            "states": deepcopy(self.states)
+            "states": deepcopy(self.states),
+            "results": sum(self.rewards)
         }
 
         self.games.append(tmp_game)
-        print(self.games)
         self.set_game()
 
     def store_rewards(self, scoreboard):
         reward = scoreboard - sum(self.rewards)
         self.rewards.append(reward)
-        print(f"PLAYER {self.player_side} REWARDS: {self.rewards}")
+        # print(f"PLAYER {self.player_side} REWARDS: {self.rewards}")
 
 
 
@@ -52,8 +54,8 @@ class RandomAgent(MancalaAgent):
         super().__init__(player_side)
         self.player_side = player_side
 
-    def select_from_possible_holes(self, holes):
-        time.sleep(.5)
+    def select_from_possible_holes(self, holes, time_delay=0):
+        time.sleep(time_delay)
         return self.player_side, random.choice(holes)
 
 
